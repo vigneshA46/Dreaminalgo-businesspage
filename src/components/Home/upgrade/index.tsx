@@ -40,7 +40,7 @@ const Upgrade = () => {
           <div>
             <div className="">
               <Image
-                src= {`${getImagePrefix()}images/upgrade/img-upgrade.png`}
+                src= {`images/upgrade/img-upgrade.png`}
                 alt="image"
                 width={625}
                 height={580}

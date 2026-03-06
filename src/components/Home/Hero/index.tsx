@@ -62,7 +62,7 @@ const Hero = () => {
           <motion.div {...leftAnimation} className="lg:col-span-5 col-span-12">
             <div className="flex gap-6 items-center lg:justify-start justify-center mb-5 mt-24">
               <Image
-                src= {`${getImagePrefix()}images/icons/icon-bag.svg`}
+                src= {`images/icons/icon-bag.svg`}
                 alt="icon"
                 width={40}
                 height={40}
@@ -92,7 +92,7 @@ const Hero = () => {
             {/* <div className="flex items-center md:justify-start justify-center gap-12 mt-20">
               <Link href="#" className="hover:scale-110 duration-300">
                 <Image
-                  src={`${getImagePrefix()}images/hero/playstore.png`}
+                  src={`images/hero/playstore.png`}
                   alt="Play Store"
                   width={240}
                   height={70}
@@ -100,7 +100,7 @@ const Hero = () => {
               </Link>
               <Link href="#" className="hover:scale-110 duration-300">
                 <Image
-                  src= {`${getImagePrefix()}images/hero/applestore.png`}
+                  src= {`images/hero/applestore.png`}
                   alt="App Store"
                   width={240}
                   height={70}
@@ -114,7 +114,7 @@ const Hero = () => {
           >
             <div className="ml-20 -mr-64">
               <Image
-                src= {`${getImagePrefix()}images/hero/banner-image.png`}
+                src= {`images/hero/banner-image.png`}
                 alt="Banner"
                 width={1150}
                 height={1150}

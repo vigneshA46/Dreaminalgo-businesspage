@@ -22,7 +22,7 @@ const Perks = () => {
               >
                 <div className="bg-primary bg-opacity-25 backdrop-blur-sm p-4 rounded-full w-fit">
                   <Image
-                    src= {`${getImagePrefix()}${item.icon}`}
+                    src= {`${item.icon}`}
                     alt={item.title}
                     width={44}
                     height={44}

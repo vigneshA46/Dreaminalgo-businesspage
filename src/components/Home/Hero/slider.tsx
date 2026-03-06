@@ -48,7 +48,7 @@ const CardSlider = () => {
                   className={`${item.background} ${item.padding} rounded-full`}
                 >
                   <Image
-                    src= {`${getImagePrefix()}${item.icon}`}
+                    src= {`${item.icon}`}
                     alt="icon"
                     width={item.width}
                     height={item.height}
