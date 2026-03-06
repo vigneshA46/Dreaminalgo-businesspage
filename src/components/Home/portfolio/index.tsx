@@ -29,10 +29,10 @@ const Portfolio = () => {
             transition={{ duration: 0.6 }}
           >
             <p className="sm:text-28 text-18 text-muted mb-4">
-              Cryptocurrency <span className="text-primary">Portfolio</span>
+              Create your <span className="text-primary">Startergy</span>
             </p>
             <h2 className="text-white sm:text-40 text-30 mb-4 font-medium">
-              Create your crypto portfolio today with Cryp
+              Create your own Startergy today with Dreamin algo
               <span className="text-primary">Go</span>!
             </h2>
             <p className="text-muted text-opacity-60 text-18">

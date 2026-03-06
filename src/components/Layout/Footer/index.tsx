@@ -39,12 +39,19 @@ const Footer: FC = () => {
                 />
               </Link>
             </div>
-            <h3 className="text-white text-24 font-medium sm:mt-20 mt-12">
+            <h3 className="text-white text-22 font-medium sm:mt-20 mt-12">
+              +91 90800 58704 <br />dreaminalgo@gmail.com
+            </h3>
+            <h3 className="text-white text-22 font-medium sm:mt-20 mt-12">
+              
+            </h3>
+            
+            {/* <h3 className="text-white text-24 font-medium sm:mt-20 mt-12">
               2025 Copright | Crypgo
             </h3>
             <h3 className="text-white text-24 font-medium sm:mt-20 mt-12">
               Distributed by <a href="https://themewagon.com" target="_blank">ThemeWagon</a>
-            </h3>
+            </h3> */}
           </div>
           <div className="lg:col-span-2 md:col-span-3 col-span-6">
             <h4 className="text-white mb-4 font-medium text-24">Links</h4>
@@ -59,6 +66,7 @@ const Footer: FC = () => {
                   </Link>
                 </li>
               ))}
+             
             </ul>
           </div>
           <div className="lg:col-span-2 md:col-span-3 col-span-6">
