@@ -8,7 +8,7 @@ const Portfolio = () => {
   return (
     <section className="md:pt-48 sm:pt-28 pt-12" id="portfolio">
       <div className="container mx-auto lg:max-w-screen-xl px-4 sm:px-6">
-        <div className="grid lg:grid-cols-2 items-center gap-20">
+        <div className="grid lg:grid-cols-2 items-center gap-20 ml-20">
           <motion.div
             whileInView={{ y: 0, opacity: 1 }}
             initial={{ y: "-100%", opacity: 0 }}

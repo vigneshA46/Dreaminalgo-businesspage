@@ -76,7 +76,7 @@ const Hero = () => {
               <span className="text-primary"></span>
             </h3>
             <div className="flex items-center md:justify-start justify-center gap-8">
-              <button
+              {/* <button
                 className="bg-primary border border-primary rounded-lg text-21 font-medium hover:bg-transparent hover:text-primary text-darkmode py-2 px-7 z-50"
                 onClick={() => setIsBuyingOpen(true)}
               >
@@ -87,7 +87,7 @@ const Hero = () => {
                 onClick={() => setIsSellingOpen(true)}
               >
                 Sell Crypto
-              </button>
+              </button> */}
             </div>
             {/* <div className="flex items-center md:justify-start justify-center gap-12 mt-20">
               <Link href="#" className="hover:scale-110 duration-300">
@@ -112,7 +112,7 @@ const Hero = () => {
             {...rightAnimation}
             className="col-span-7 lg:block hidden"
           >
-            <div className="ml-20 -mr-64">
+            <div className="ml-20 -mr-70">
               <Image
                 src= {`images/hero/banner-image.png`}
                 alt="Banner"

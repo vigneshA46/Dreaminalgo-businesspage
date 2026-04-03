@@ -42,9 +42,6 @@ const Footer: FC = () => {
             <h3 className="text-white text-22 font-medium sm:mt-20 mt-12">
               +91 90800 58704 <br />dreaminalgo@gmail.com
             </h3>
-            <h3 className="text-white text-22 font-medium sm:mt-20 mt-12">
-              
-            </h3>
             
             {/* <h3 className="text-white text-24 font-medium sm:mt-20 mt-12">
               2025 Copright | Crypgo

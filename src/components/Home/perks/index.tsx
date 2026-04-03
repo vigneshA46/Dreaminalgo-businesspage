@@ -7,7 +7,7 @@ const Perks = () => {
     <section className="pb-28 relative">
       <div className="container mx-auto lg:max-w-screen-xl px-4">
         <div className="text-center">
-          <p className="text-muted sm:text-28 text-18 mb-4 pb-6 relative after:content-[''] after:w-8 after:h-0.5 after:bg-primary after:absolute after:bottom-0 after:left-1/2">
+          <p className="text-muted sm:text-28 text-18 mb-4 pb-6 pt-10 relative after:content-[''] after:w-8 after:h-0.5 after:bg-primary after:absolute after:bottom-0 after:left-1/2">
             Always By <span className="text-primary">your side</span>
           </p>
           <h2 className="text-white sm:text-40 text-30 font-medium">

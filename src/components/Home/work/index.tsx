@@ -36,6 +36,11 @@ const Work = () => {
     text: "Dreamin Academy",
     desc: "Professional training platform helping traders master financial markets and strategies."
   },
+  {
+    icon: "/images/icons/icon-Services.svg",
+    text: "Market Analysis",
+    desc: "Use our maket analysis data FII Data , Heat maps and Oi data to analyse everyday market"
+  },
 ];
 
   return (

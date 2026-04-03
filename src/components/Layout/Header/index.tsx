@@ -110,11 +110,9 @@ const Header: React.FC = () => {
               </svg>
             </button> */}
             <Link
-              href="#"
+              href="https://algo.dreamintraders.in/"
               className="hidden lg:block bg-transparent text-primary border hover:bg-primary border-primary hover:text-darkmode px-4 py-2 rounded-lg"
-              onClick={() => {
-                setIsSignInOpen(true);
-              }}
+             
             >
               Algo SignIn
             </Link>
@@ -139,11 +137,9 @@ const Header: React.FC = () => {
               </div>
             )}
             <Link
-              href="#"
+              href="https://algo.dreamintraders.in/auth/signup"
               className="hidden lg:block bg-primary text-darkmode hover:bg-transparent hover:text-primary border border-primary px-4 py-2 rounded-lg"
-              onClick={() => {
-                setIsSignUpOpen(true);
-              }}
+              
             >
               Register
             </Link>
