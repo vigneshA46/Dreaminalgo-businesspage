@@ -27,12 +27,12 @@ const Work = () => {
     desc: "Providing expert financial guidance, market insights, and smart investment solutions."
   },
   {
-    icon: "/images/icons/icon-blockchain.svg",
-    text: "Dreamin Algo",
+    icon: "/images/dreamingalgo_bgrem.png",
+    text: "Dreamin Algo", 
     desc: "Advanced algorithmic trading solutions designed for smarter and faster market execution."
   },
   {
-    icon: "/images/icons/icon-Services.svg",
+    icon: "/images/dreamin_academy.png",
     text: "Dreamin Academy",
     desc: "Professional training platform helping traders master financial markets and strategies."
   },
@@ -51,7 +51,7 @@ const Work = () => {
             {...bottomAnimation}
             className="lg:col-span-12 col-span-12"
           >
-            <p className="sm:text-28 text-18 text-white">
+            <p className="sm:text-28 text-18 text-white mt-18">
               What we <span className="text-primary">do</span>
             </p>
             <h2 className="sm:text-40 text-30 text-white lg:w-full md:w-70% font-medium">
@@ -67,7 +67,7 @@ const Work = () => {
         <Image
         src={service.icon}
         alt={`${service.text} icon`}
-        width={40}
+        width={60}
         height={40}
         />
       </div>

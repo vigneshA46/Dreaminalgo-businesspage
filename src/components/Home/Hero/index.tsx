@@ -8,6 +8,8 @@ import CardSlider from "./slider";
 import { useEffect, useRef, useState, useCallback } from "react";
 import { Icon } from "@iconify/react/dist/iconify.js";
 import { getImagePrefix } from "@/utils/utils";
+import { Brain } from "lucide-react";
+
 
 const Hero = () => {
   const [isBuying, setIsBuyingOpen] = useState(false);
@@ -61,12 +63,7 @@ const Hero = () => {
         <div className="grid grid-cols-12">
           <motion.div {...leftAnimation} className="lg:col-span-5 col-span-12">
             <div className="flex gap-6 items-center lg:justify-start justify-center mb-5 mt-24">
-              <Image
-                src= {`images/icons/icon-bag.svg`}
-                alt="icon"
-                width={40}
-                height={40}
-              />
+              <Brain size={40} className="text-primary animate-pulse" />
               <p className="text-white sm:text-28 text-18 mb-0">
                 Dreamin <span className="text-primary">AlGo</span>
               </p>
@@ -75,44 +72,14 @@ const Hero = () => {
               Learn. <span className="text-primary">Automate. </span>Trade Smarter! {" "}
               <span className="text-primary"></span>
             </h3>
-            <div className="flex items-center md:justify-start justify-center gap-8">
-              {/* <button
-                className="bg-primary border border-primary rounded-lg text-21 font-medium hover:bg-transparent hover:text-primary text-darkmode py-2 px-7 z-50"
-                onClick={() => setIsBuyingOpen(true)}
-              >
-                Buy Crypto
-              </button>
-              <button
-                className="bg-transparent border border-primary rounded-lg text-21 font-medium hover:bg-primary hover:text-darkmode text-primary py-2 px-7"
-                onClick={() => setIsSellingOpen(true)}
-              >
-                Sell Crypto
-              </button> */}
-            </div>
-            {/* <div className="flex items-center md:justify-start justify-center gap-12 mt-20">
-              <Link href="#" className="hover:scale-110 duration-300">
-                <Image
-                  src={`images/hero/playstore.png`}
-                  alt="Play Store"
-                  width={240}
-                  height={70}
-                />
-              </Link>
-              <Link href="#" className="hover:scale-110 duration-300">
-                <Image
-                  src= {`images/hero/applestore.png`}
-                  alt="App Store"
-                  width={240}
-                  height={70}
-                />
-              </Link>
-            </div> */}
+        
+
           </motion.div>
           <motion.div
             {...rightAnimation}
             className="col-span-7 lg:block hidden"
           >
-            <div className="ml-20 -mr-70">
+            <div className="ml-20 mr-70">
               <Image
                 src= {`images/hero/banner-image.png`}
                 alt="Banner"
