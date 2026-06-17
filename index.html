@@ -98,7 +98,8 @@
     <header class="sticky top-0 z-50 bg-brand-bg/70 backdrop-blur-xl border-b border-brand-border/80 transition-all duration-300">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
             <div class="flex items-center space-x-3 group cursor-pointer">
-                <div class="w-10 h-10 bg-gradient-to-br from-brand to-brand-dark rounded-xl flex items-center justify-center font-black text-white text-xl shadow-neon-orange transition-transform duration-500 group-hover:rotate-12">D</div>
+                <img src="/changedlogo-removebg-preview.png" width="55"  />
+                <!-- <div class="w-10 h-10 bg-gradient-to-br from-brand to-brand-dark rounded-xl flex items-center justify-center font-black text-white text-xl shadow-neon-orange transition-transform duration-500 group-hover:rotate-12">D</div> -->
                 <span class="text-xl font-bold tracking-tight text-white transition-colors">Dreamin <span class="text-brand group-hover:text-brand-light">Traders</span></span>
             </div>
             
@@ -129,36 +130,46 @@
         </div>
     </div>
 
-    <section class="relative pt-24 pb-20 md:pt-36 md:pb-32 overflow-hidden">
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-[600px] bg-gradient-to-b from-brand/5 to-transparent blur-[120px] pointer-events-none"></div>
-        
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-20">
-            <div class="inline-flex items-center space-x-2 bg-brand/10 border border-brand/20 text-brand text-[11px] font-mono tracking-wider px-4 py-1.5 rounded-full mb-8" data-aos="fade-down">
-                <span class="w-2 h-2 rounded-full bg-brand animate-ping"></span>
-                <span>SYSTEM VERSION 4.2 INDUSTRIAL LIVE DEPLOYMENT</span>
-            </div>
-            
-            <h1 class="text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tight text-white max-w-5xl mx-auto leading-[1.1] mb-8" data-aos="fade-up" data-aos-delay="100">
-                Learn. Automate.<br>
-                <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand via-brand-light to-white font-extrabold tracking-wide drop-shadow-sm">Trade Smarter!</span>
-            </h1>
-            
-            <p class="text-gray-400 text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mb-12" data-aos="fade-up" data-aos-delay="200">
-                Empowering institutional and retail desk traders with high-frequency algorithmic strategies, real-time market data pipelines, and quantitative education to master continuous global capital markets.
-            </p>
-
-            <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-5" data-aos="fade-up" data-aos-delay="300">
-                <a href="#" class="w-full sm:w-auto bg-brand hover:bg-brand-dark text-white font-semibold px-8 py-4 rounded-xl transition-all shadow-neon-orange flex items-center justify-center space-x-3 transform hover:-translate-y-0.5">
-                    <span>Initialize Free Account</span>
-                    <i class="fa-solid fa-arrow-right-long text-sm"></i>
-                </a>
-                <a href="#algo" class="w-full sm:w-auto bg-brand-card/80 hover:bg-brand-card text-gray-300 font-semibold px-8 py-4 rounded-xl transition-all border border-brand-border hover:border-brand/40 flex items-center justify-center space-x-2">
-                    <i class="fa-solid fa-bolt-lightning text-brand text-xs"></i>
-                    <span>Verify Live Performance</span>
-                </a>
-            </div>
+    <!-- new hero section -->
+    <!-- <div style="margin-top: 1rem;" class="flex items-center justify-center  group cursor-pointer">
+    <img  src="/changedlogo-removebg-preview.png" width="150"  />
+    </div> -->
+    <section class="relative min-h-[85vh] flex items-center justify-center overflow-hidden py-20">
+    
+    <div class="absolute inset-0 z-0 pointer-events-none">
+        <canvas id="hero-canvas" class="w-full h-full opacity-60 mix-blend-screen"></canvas>
+        <div class="absolute inset-0 bg-gradient-to-b from-brand-bg/10 via-transparent to-brand-bg"></div>
+    </div>
+    
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center relative z-20">
+        <div class="inline-flex items-center space-x-2 bg-brand/10 border border-brand/20 text-brand text-[11px] font-mono tracking-wider px-4 py-1.5 rounded-full mb-8" data-aos="fade-down">
+            <span class="w-2 h-2 rounded-full bg-brand animate-ping"></span>
+            <span>SYSTEM VERSION 4.2 INDUSTRIAL LIVE DEPLOYMENT</span>
         </div>
-    </section>
+        
+        <h1 class="text-4xl sm:text-6xl md:text-7xl font-semibold tracking-tight text-white max-w-5xl mx-auto leading-[1.1] mb-8" data-aos="fade-up" data-aos-delay="100">
+            Learn. Automate.<br>
+            <span class="text-transparent bg-clip-text bg-gradient-to-r from-brand via-brand-light to-white font-extrabold tracking-wide drop-shadow-sm">Trade Smarter!</span>
+        </h1>
+        
+        <p class="text-gray-400 text-base sm:text-lg max-w-3xl mx-auto leading-relaxed mb-12" data-aos="fade-up" data-aos-delay="200">
+            Empowering institutional and retail desk traders with high-frequency algorithmic strategies, real-time market data pipelines, and quantitative education to master continuous global capital markets.
+        </p>
+
+        <div class="flex flex-col sm:flex-row items-center justify-center space-y-4 sm:space-y-0 sm:space-x-5" data-aos="fade-up" data-aos-delay="300">
+            <a href="#" class="w-full sm:w-auto bg-brand hover:bg-brand-dark text-white font-semibold px-8 py-4 rounded-xl transition-all shadow-neon-orange flex items-center justify-center space-x-3 transform hover:-translate-y-0.5">
+                <span>Initialize Free Account</span>
+                <i class="fa-solid fa-arrow-right-long text-sm"></i>
+            </a>
+            <a href="#algo" class="w-full sm:w-auto bg-brand-card/80 hover:bg-brand-card text-gray-300 font-semibold px-8 py-4 rounded-xl transition-all border border-brand-border hover:border-brand/40 flex items-center justify-center space-x-2">
+                <i class="fa-solid fa-bolt-lightning text-brand text-xs"></i>
+                <span>Verify Live Performance</span>
+            </a>
+        </div>
+    </div>
+  </section>
+
+    <!-- new hero section -->
 
     <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-28 relative z-20" data-aos="fade-up" data-aos-delay="400">
         <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -656,6 +667,73 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
 
     <script>
+
+      (function() {
+        const canvas = document.getElementById('hero-canvas');
+        const ctx = canvas.getContext('2d');
+
+        let width = canvas.width = canvas.parentElement.offsetWidth;
+        let height = canvas.height = canvas.parentElement.offsetHeight;
+
+        // Handle viewport adjustments smoothly
+        window.addEventListener('resize', () => {
+            if(canvas.parentElement) {
+                width = canvas.width = canvas.parentElement.offsetWidth;
+                height = canvas.height = canvas.parentElement.offsetHeight;
+            }
+        });
+
+        let incrementor = 0;
+
+        function renderFluidHeroBackground() {
+            ctx.clearRect(0, 0, width, height);
+
+            // Establish standard design configurations 
+            ctx.lineWidth = 1;
+            
+            // Loop to render 3 layered morphing waves for visual depth
+            for (let waveIndex = 0; waveIndex < 3; waveIndex++) {
+                ctx.beginPath();
+                
+                // Gradually separate colors and opacities per layer
+                if (waveIndex === 0) ctx.strokeStyle = 'rgba(255, 107, 0, 0.12)';       // Brand Orange Primary
+                else if (waveIndex === 1) ctx.strokeStyle = 'rgba(255, 163, 102, 0.06)'; // Brand Orange Light
+                else ctx.strokeStyle = 'rgba(22, 34, 56, 0.4)';                          // Dark Slate Accent Link
+
+                // Plot points horizontally across the screen width
+                for (let x = 0; x < width; x += 10) {
+                    // Sine-wave logic combined with our continuous time incrementor to generate motion
+                    const y = hscale(waveIndex, x);
+                    if (x === 0) {
+                        ctx.moveTo(x, y);
+                    } else {
+                        ctx.lineTo(x, y);
+                    }
+                }
+                ctx.stroke();
+            }
+
+            // Slowly increment time frame vectors
+            incrementor += 0.003;
+            requestAnimationFrame(renderFluidHeroBackground);
+        }
+
+        // Mathematical wave-mapping helper
+        function hscale(index, xPosition) {
+            const baseFrequency = 0.0025;
+            const separationShift = index * 50;
+            
+            // Combines multiple sine coordinates to make the movement look organic instead of uniform
+            return (height * 0.5) + 
+                   Math.sin(xPosition * baseFrequency + incrementor + separationShift) * 60 * Math.sin(incrementor * 0.5) +
+                   Math.cos(xPosition * 0.001 - incrementor + index) * 30;
+        }
+
+        // Fire execution loop
+        renderFluidHeroBackground();
+    })();
+
+
         // Initialize Scroll Transitions Fades
         AOS.init({ duration: 900, once: true, offset: 50 });
 
