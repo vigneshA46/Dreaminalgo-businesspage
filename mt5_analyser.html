@@ -38,6 +38,8 @@ th:first-child,td:first-child{text-align:left}
 th{color:var(--muted);font-size:12px}
 .positive{color:var(--green);font-weight:700}.negative{color:var(--red);font-weight:700}
 .empty{padding:60px;text-align:center;color:var(--muted)}
+.table-card table td:nth-child(2),
+.table-card table th:nth-child(2){text-align:center}
 .footer{text-align:center;color:var(--muted);font-size:12px;padding:28px}
 @media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
 @media(max-width:650px){.container{padding:14px}.grid{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}.upload{width:100%}}
@@ -83,16 +85,33 @@ th{color:var(--muted);font-size:12px}
       <div class="card chart-card"><h3>Daily P&L</h3><div class="chart-wrap"><canvas id="dailyPnlChart"></canvas></div></div>
       <div class="card chart-card"><h3>Cumulative P&L</h3><div class="chart-wrap"><canvas id="cumulativeChart"></canvas></div></div>
       <div class="card chart-card"><h3>Monthly Return</h3><div class="chart-wrap"><canvas id="monthlyChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Weekly P&L</h3><div class="chart-wrap"><canvas id="weeklyPnlChart"></canvas></div></div>
       <div class="card chart-card"><h3>Daily Win Rate</h3><div class="chart-wrap"><canvas id="winRateChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Weekly Win Rate</h3><div class="chart-wrap"><canvas id="weeklyWinRateChart"></canvas></div></div>
       <div class="card chart-card"><h3>Trade Results</h3><div class="chart-wrap"><canvas id="tradeResultChart"></canvas></div></div>
       <div class="card chart-card"><h3>P&L by Exit Reason</h3><div class="chart-wrap"><canvas id="reasonChart"></canvas></div></div>
       <div class="card chart-card"><h3>Daily Trade Count</h3><div class="chart-wrap"><canvas id="tradeCountChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Weekly Trade Count</h3><div class="chart-wrap"><canvas id="weeklyTradeCountChart"></canvas></div></div>
     </div>
 
     <div class="section">Day-wise Performance</div>
     <div class="card table-card">
       <table><thead><tr><th>Date</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>P&L</th><th>Cumulative P&L</th></tr></thead>
       <tbody id="dailyTable"></tbody></table>
+    </div>
+
+    <div class="section">Weekly Performance by Month</div>
+    <div class="card table-card">
+      <table>
+        <thead>
+          <tr>
+            <th>Month</th><th>Week</th><th>Date Range</th><th>Trades</th>
+            <th>Wins</th><th>Losses</th><th>Win Rate</th>
+            <th>P&L</th><th>Cumulative P&L</th>
+          </tr>
+        </thead>
+        <tbody id="weeklyTable"></tbody>
+      </table>
     </div>
 
     <div class="section">Monthly Performance</div>
@@ -108,7 +127,7 @@ th{color:var(--muted);font-size:12px}
     </div>
   </div>
 
-  <div class="footer">All calculations run locally in your browser. P&L is calculated exclusively from the Points column. Your CSV is not uploaded to a server.</div>
+  <div class="footer">All calculations run locally in your browser. P&L is calculated exclusively from the Points column. Weekly analysis resets Week 1 at the start of every calendar month. Your CSV is not uploaded to a server.</div>
 </div>
 
 <script>
@@ -303,6 +322,92 @@ function cleanTrades(rows){
 }
 function keyDate(d){return d.toISOString().slice(0,10)}
 function keyMonth(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+
+/*
+ * Calendar-month weekly analysis:
+ * Week 1 = days 1-7
+ * Week 2 = days 8-14
+ * Week 3 = days 15-21
+ * Week 4 = days 22-28
+ * Week 5 = days 29-end of month
+ *
+ * Week numbering resets for every month.
+ */
+function getWeekOfMonth(d){
+  return Math.floor((d.getDate()-1)/7)+1;
+}
+
+function keyWeek(d){
+  return keyMonth(d)+"-W"+getWeekOfMonth(d);
+}
+
+function monthLabelFromKey(key){
+  const parts=key.split("-");
+  const year=Number(parts[0]);
+  const month=Number(parts[1])-1;
+  return new Date(year,month,1).toLocaleString(undefined,{month:"long",year:"numeric"});
+}
+
+function weekDateRange(year,monthNumber,weekNumber){
+  const startDay=(weekNumber-1)*7+1;
+  const lastDay=new Date(year,monthNumber,0).getDate();
+  const endDay=Math.min(startDay+6,lastDay);
+  return {
+    startDay,
+    endDay,
+    label:String(startDay).padStart(2,"0")+"-"+String(endDay).padStart(2,"0")
+  };
+}
+
+function aggregateWeekly(data){
+  const m=new Map();
+
+  data.forEach(r=>{
+    const d=r.entryTime;
+    const monthKey=keyMonth(d);
+    const week=getWeekOfMonth(d);
+    const key=monthKey+"-W"+week;
+
+    if(!m.has(key)){
+      m.set(key,{
+        key,
+        monthKey,
+        month:monthLabelFromKey(monthKey),
+        week,
+        year:d.getFullYear(),
+        monthNumber:d.getMonth()+1,
+        trades:0,
+        wins:0,
+        losses:0,
+        be:0,
+        pnl:0
+      });
+    }
+
+    const x=m.get(key);
+    x.trades++;
+    x.pnl+=r.pnl;
+
+    if(r.pnl>0)x.wins++;
+    else if(r.pnl<0)x.losses++;
+    else x.be++;
+  });
+
+  let cumulative=0;
+
+  return [...m.values()]
+    .sort((a,b)=>a.key.localeCompare(b.key))
+    .map(x=>{
+      cumulative+=x.pnl;
+      const range=weekDateRange(x.year,x.monthNumber,x.week);
+
+      x.dateRange=range.label;
+      x.winRate=x.trades?x.wins/x.trades*100:0;
+      x.cum=cumulative;
+
+      return x;
+    });
+}
 function aggregate(data, keyFn){
   const m=new Map();
   data.forEach(r=>{
@@ -357,24 +462,112 @@ function chart(id,type,labels,data,label){
   charts[id]=new Chart($(id),{type,data:{labels,datasets:[{label,data,borderWidth:2,borderRadius:5,tension:.3,fill:false}]},
     options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:"#edf0f5"}}}}});
 }
-function renderCharts(daily,monthly,reasons,data){
+function renderCharts(daily,monthly,weekly,reasons,data){
   destroyCharts();
-  chart("dailyPnlChart","bar",daily.map(x=>x.key),daily.map(x=>x.pnl),"Daily P&L");
-  chart("cumulativeChart","line",daily.map(x=>x.key),daily.map(x=>x.cum),"Cumulative P&L");
-  chart("monthlyChart","bar",monthly.map(x=>x.key),monthly.map(x=>x.pnl),"Monthly P&L");
-  chart("winRateChart","line",daily.map(x=>x.key),daily.map(x=>x.winRate),"Win Rate");
-  const results=[data.filter(r=>r.pnl>0).length,data.filter(r=>r.pnl<0).length,data.filter(r=>r.pnl===0).length];
-  charts.tradeResultChart=new Chart($("tradeResultChart"),{type:"doughnut",data:{labels:["Winning","Losing","Breakeven"],datasets:[{data:results}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}}});
-  chart("reasonChart","bar",reasons.map(x=>x.reason||"Unknown"),reasons.map(x=>x.pnl),"P&L");
-  chart("tradeCountChart","bar",daily.map(x=>x.key),daily.map(x=>x.trades),"Trades");
+
+  chart("dailyPnlChart","bar",
+    daily.map(x=>x.key),
+    daily.map(x=>x.pnl),
+    "Daily P&L"
+  );
+
+  chart("cumulativeChart","line",
+    daily.map(x=>x.key),
+    daily.map(x=>x.cum),
+    "Cumulative P&L"
+  );
+
+  chart("monthlyChart","bar",
+    monthly.map(x=>x.key),
+    monthly.map(x=>x.pnl),
+    "Monthly P&L"
+  );
+
+  chart("weeklyPnlChart","bar",
+    weekly.map(x=>x.month+" - Week "+x.week),
+    weekly.map(x=>x.pnl),
+    "Weekly P&L"
+  );
+
+  chart("winRateChart","line",
+    daily.map(x=>x.key),
+    daily.map(x=>x.winRate),
+    "Daily Win Rate"
+  );
+
+  chart("weeklyWinRateChart","line",
+    weekly.map(x=>x.month+" - Week "+x.week),
+    weekly.map(x=>x.winRate),
+    "Weekly Win Rate"
+  );
+
+  const results=[
+    data.filter(r=>r.pnl>0).length,
+    data.filter(r=>r.pnl<0).length,
+    data.filter(r=>r.pnl===0).length
+  ];
+
+  charts.tradeResultChart=new Chart($("tradeResultChart"),{
+    type:"doughnut",
+    data:{
+      labels:["Winning","Losing","Breakeven"],
+      datasets:[{data:results}]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{legend:{position:"bottom"}}
+    }
+  });
+
+  chart("reasonChart","bar",
+    reasons.map(x=>x.reason||"Unknown"),
+    reasons.map(x=>x.pnl),
+    "P&L"
+  );
+
+  chart("tradeCountChart","bar",
+    daily.map(x=>x.key),
+    daily.map(x=>x.trades),
+    "Daily Trades"
+  );
+
+  chart("weeklyTradeCountChart","bar",
+    weekly.map(x=>x.month+" - Week "+x.week),
+    weekly.map(x=>x.trades),
+    "Weekly Trades"
+  );
 }
 function tableRow(x){
   return `<tr><td>${x.key}</td><td>${x.trades}</td><td>${x.wins}</td><td>${x.losses}</td><td>${pct(x.winRate)}</td><td class="${x.pnl>=0?"positive":"negative"}">${money(x.pnl)}</td><td class="${x.cum>=0?"positive":"negative"}">${money(x.cum)}</td></tr>`;
 }
-function renderTables(daily,monthly,reasons){
+function renderTables(daily,weekly,monthly,reasons){
   $("dailyTable").innerHTML=daily.map(tableRow).join("");
+
+  $("weeklyTable").innerHTML=weekly.map(x=>`
+    <tr>
+      <td>${x.month}</td>
+      <td>Week ${x.week}</td>
+      <td>${x.dateRange}</td>
+      <td>${x.trades}</td>
+      <td>${x.wins}</td>
+      <td>${x.losses}</td>
+      <td>${pct(x.winRate)}</td>
+      <td class="${x.pnl>=0?"positive":"negative"}">${money(x.pnl)}</td>
+      <td class="${x.cum>=0?"positive":"negative"}">${money(x.cum)}</td>
+    </tr>
+  `).join("");
+
   $("monthlyTable").innerHTML=monthly.map(tableRow).join("");
-  $("reasonTable").innerHTML=reasons.map(x=>`<tr><td>${x.reason||"Unknown"}</td><td>${x.trades}</td><td class="${x.pnl>=0?"positive":"negative"}">${money(x.pnl)}</td><td>${money(x.avg)}</td></tr>`).join("");
+
+  $("reasonTable").innerHTML=reasons.map(x=>`
+    <tr>
+      <td>${x.reason||"Unknown"}</td>
+      <td>${x.trades}</td>
+      <td class="${x.pnl>=0?"positive":"negative"}">${money(x.pnl)}</td>
+      <td>${money(x.avg)}</td>
+    </tr>
+  `).join("");
 }
 function analyze(rows){
   try{
@@ -387,8 +580,15 @@ function analyze(rows){
         ". First row: " + sample
       );
     }
-    const daily=aggregate(data,keyDate), monthly=aggregate(data,keyMonth), reasons=reasonData(data), stats=statistics(data,daily);
-    renderStats(stats);renderCharts(daily,monthly,reasons,data);renderTables(daily,monthly,reasons);
+    const daily=aggregate(data,keyDate);
+    const weekly=aggregateWeekly(data);
+    const monthly=aggregate(data,keyMonth);
+    const reasons=reasonData(data);
+    const stats=statistics(data,daily);
+
+    renderStats(stats);
+    renderCharts(daily,monthly,weekly,reasons,data);
+    renderTables(daily,weekly,monthly,reasons);
     $("dashboard").style.display="block";
     $("status").textContent=`Loaded ${data.length} clean trades. Duplicate records removed automatically.`;
   }catch(e){$("status").textContent="ERROR: "+e.message;}
