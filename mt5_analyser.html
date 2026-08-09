@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MT5 Trading Analytics Dashboard</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f7fb;--card:#fff;--text:#172033;--muted:#718096;--border:#e6ebf2;
+  --primary:#5b5ce2;--green:#16a673;--red:#e55353;--orange:#f59e0b;
+  --shadow:0 8px 28px rgba(31,45,61,.07);
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.container{max-width:1500px;margin:auto;padding:28px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:20px;margin-bottom:24px}
+.brand h1{margin:0;font-size:28px}.brand p{margin:6px 0 0;color:var(--muted)}
+.upload{background:var(--card);border:1px solid var(--border);padding:10px 14px;border-radius:12px;box-shadow:var(--shadow)}
+input[type=file]{max-width:240px}
+.drop{border:2px dashed #cfd6e4;border-radius:18px;background:#fff;padding:35px;text-align:center;margin-bottom:22px}
+.drop.drag{border-color:var(--primary);background:#f5f5ff}
+.drop h2{margin:0 0 8px}.drop p{color:var(--muted)}
+button{border:0;background:var(--primary);color:#fff;padding:11px 18px;border-radius:10px;cursor:pointer;font-weight:700}
+#status{margin-top:10px;color:var(--muted);font-size:14px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:20px;box-shadow:var(--shadow)}
+.metric .label{color:var(--muted);font-size:13px;font-weight:600}.metric .value{font-size:26px;font-weight:800;margin-top:8px}
+.green{color:var(--green)}.red{color:var(--red)}.orange{color:var(--orange)}
+.section{margin:26px 0 12px;font-size:18px;font-weight:800}
+.charts{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.chart-card{min-height:360px}.chart-card h3{margin:0 0 15px;font-size:15px}
+.chart-wrap{height:290px;position:relative}
+.table-card{overflow:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{padding:12px;border-bottom:1px solid var(--border);text-align:right;white-space:nowrap}
+th:first-child,td:first-child{text-align:left}
+th{color:var(--muted);font-size:12px}
+.positive{color:var(--green);font-weight:700}.negative{color:var(--red);font-weight:700}
+.empty{padding:60px;text-align:center;color:var(--muted)}
+.footer{text-align:center;color:var(--muted);font-size:12px;padding:28px}
+@media(max-width:1050px){.grid{grid-template-columns:repeat(2,1fr)}.charts{grid-template-columns:1fr}}
+@media(max-width:650px){.container{padding:14px}.grid{grid-template-columns:1fr}.header{align-items:flex-start;flex-direction:column}.upload{width:100%}}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="header">
+    <div class="brand">
+      <h1>MT5 Trading Analytics</h1>
+      <p>Interactive performance dashboard for your trade CSV</p>
+    </div>
+    <div class="upload">
+      <input id="fileInput" type="file" accept=".csv,.txt">
+    </div>
+  </div>
+
+  <div id="dropZone" class="drop">
+    <h2>Upload your trading CSV</h2>
+    <p>Drop <b>RSAbuyingselling.csv</b> here or select it above.</p>
+    <button id="demoBtn">Load Demo Data</button>
+    <div id="status">Waiting for CSV...</div>
+  </div>
+
+  <div id="dashboard" style="display:none">
+    <div class="grid">
+      <div class="card metric"><div class="label">Total P&L (Points)</div><div id="totalPnl" class="value">0</div></div>
+      <div class="card metric"><div class="label">Total Trades</div><div id="totalTrades" class="value">0</div></div>
+      <div class="card metric"><div class="label">Win Rate</div><div id="winRate" class="value">0%</div></div>
+      <div class="card metric"><div class="label">Profit Factor</div><div id="profitFactor" class="value">0</div></div>
+      <div class="card metric"><div class="label">Gross Profit</div><div id="grossProfit" class="value green">0</div></div>
+      <div class="card metric"><div class="label">Gross Loss</div><div id="grossLoss" class="value red">0</div></div>
+      <div class="card metric"><div class="label">Average Trade (Points)</div><div id="avgTrade" class="value">0</div></div>
+      <div class="card metric"><div class="label">Maximum Drawdown</div><div id="drawdown" class="value red">0</div></div>
+      <div class="card metric"><div class="label">Best Trade</div><div id="bestTrade" class="value green">0</div></div>
+      <div class="card metric"><div class="label">Worst Trade</div><div id="worstTrade" class="value red">0</div></div>
+      <div class="card metric"><div class="label">Best Day</div><div id="bestDay" class="value green">-</div></div>
+      <div class="card metric"><div class="label">Worst Day</div><div id="worstDay" class="value red">-</div></div>
+    </div>
+
+    <div class="section">Performance Overview</div>
+    <div class="charts">
+      <div class="card chart-card"><h3>Daily P&L</h3><div class="chart-wrap"><canvas id="dailyPnlChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Cumulative P&L</h3><div class="chart-wrap"><canvas id="cumulativeChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Monthly Return</h3><div class="chart-wrap"><canvas id="monthlyChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Daily Win Rate</h3><div class="chart-wrap"><canvas id="winRateChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Trade Results</h3><div class="chart-wrap"><canvas id="tradeResultChart"></canvas></div></div>
+      <div class="card chart-card"><h3>P&L by Exit Reason</h3><div class="chart-wrap"><canvas id="reasonChart"></canvas></div></div>
+      <div class="card chart-card"><h3>Daily Trade Count</h3><div class="chart-wrap"><canvas id="tradeCountChart"></canvas></div></div>
+    </div>
+
+    <div class="section">Day-wise Performance</div>
+    <div class="card table-card">
+      <table><thead><tr><th>Date</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>P&L</th><th>Cumulative P&L</th></tr></thead>
+      <tbody id="dailyTable"></tbody></table>
+    </div>
+
+    <div class="section">Monthly Performance</div>
+    <div class="card table-card">
+      <table><thead><tr><th>Month</th><th>Trades</th><th>Wins</th><th>Losses</th><th>Win Rate</th><th>P&L</th><th>Cumulative P&L</th></tr></thead>
+      <tbody id="monthlyTable"></tbody></table>
+    </div>
+
+    <div class="section">Exit Reason Analysis</div>
+    <div class="card table-card">
+      <table><thead><tr><th>Exit Reason</th><th>Trades</th><th>P&L</th><th>Average P&L</th></tr></thead>
+      <tbody id="reasonTable"></tbody></table>
+    </div>
+  </div>
+
+  <div class="footer">All calculations run locally in your browser. P&L is calculated exclusively from the Points column. Your CSV is not uploaded to a server.</div>
+</div>
+
+<script>
+let charts={};
+const $=id=>document.getElementById(id);
+const money=n=>Number(n||0).toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:2});
+const pct=n=>Number(n||0).toFixed(2)+"%";
+
+function detectDelimiter(text){
+  // MT5 exports are commonly TAB-separated.
+  const first = text.split(/\r?\n/).find(line => line.trim() !== "") || "";
+
+  const candidates = [",", "\t", ";", "|"];
+
+  function countDelimiter(line, delimiter){
+    let count = 0;
+    let inQuotes = false;
+
+    for(let i = 0; i < line.length; i++){
+      const ch = line[i];
+
+      if(ch === '"'){
+        if(inQuotes && line[i + 1] === '"'){
+          i++;
+        }else{
+          inQuotes = !inQuotes;
+        }
+      }else if(!inQuotes && ch === delimiter){
+        count++;
+      }
+    }
+
+    return count;
+  }
+
+  let bestDelimiter = ",";
+  let bestCount = -1;
+
+  for(const delimiter of candidates){
+    const count = countDelimiter(first, delimiter);
+
+    if(count > bestCount){
+      bestCount = count;
+      bestDelimiter = delimiter;
+    }
+  }
+
+  return bestDelimiter;
+}
+function normalizeRow(row){
+  const out={};
+  Object.keys(row).forEach(k=>out[String(k).replace(/^\\ufeff/,"").trim()]=row[k]);
+  return out;
+}
+function num(v){
+  if(v===null||v===undefined||v==="") return NaN;
+  return Number(String(v).replace(/,/g,"").trim());
+}
+function parseDate(v){
+  if(v === null || v === undefined) return null;
+
+  // Normalize everything first. MT5 exports commonly use:
+  // 2024.12.02 18:32:36
+  const value = String(v)
+    .replace(/^\uFEFF/, "")
+    .replace(/\u00A0/g, " ")
+    .trim();
+
+  if(!value) return null;
+
+  // Explicit MT5 parser. Do NOT rely on browser Date parsing.
+  const match = value.match(
+    /^(\d{4})\s*[.\/-]\s*(\d{1,2})\s*[.\/-]\s*(\d{1,2})\s+(\d{1,2}):(\d{2})(?::(\d{2})(?:\.(\d+))?)?$/
+  );
+
+  if(match){
+    const year = Number(match[1]);
+    const month = Number(match[2]);
+    const day = Number(match[3]);
+    const hour = Number(match[4]);
+    const minute = Number(match[5]);
+    const second = Number(match[6] || 0);
+
+    const d = new Date(0);
+    d.setFullYear(year, month - 1, day);
+    d.setHours(hour, minute, second, 0);
+
+    if(
+      d.getFullYear() === year &&
+      d.getMonth() === month - 1 &&
+      d.getDate() === day &&
+      d.getHours() === hour &&
+      d.getMinutes() === minute &&
+      d.getSeconds() === second
+    ){
+      return d;
+    }
+  }
+
+  // Fallback for formats such as:
+  // 2024-12-02 18:32:36
+  // 2024/12/02 18:32:36
+  const normalized = value.replace(/\./g, "-");
+  const fallback = new Date(normalized);
+
+  return isNaN(fallback.getTime()) ? null : fallback;
+}
+function cleanTrades(rows){
+  const required=[
+    "Entry Time IST","Exit Time IST","Side",
+    "Entry","Exit","SL","TP","Points","PnL","Reason"
+  ];
+
+  rows = rows.map(normalizeRow);
+
+  if(!rows.length){
+    throw new Error("CSV has no trade rows.");
+  }
+
+  // Normalize headers one more time, including hidden whitespace/BOM.
+  const headerMap = {};
+  Object.keys(rows[0]).forEach(key => {
+    const normalized = String(key)
+      .replace(/^\uFEFF/, "")
+      .replace(/\u00A0/g, " ")
+      .trim();
+    headerMap[normalized] = key;
+  });
+
+  const missing = required.filter(name => !(name in headerMap));
+
+  if(missing.length){
+    throw new Error(
+      "Missing columns: " + missing.join(", ") +
+      ". Detected columns: " + Object.keys(headerMap).join(" | ")
+    );
+  }
+
+  function value(row, column){
+    return row[headerMap[column]];
+  }
+
+  const parsed = rows.map(r => {
+    const entryRaw = value(r, "Entry Time IST");
+    const exitRaw = value(r, "Exit Time IST");
+
+    return {
+      original: r,
+      entryRaw,
+      exitRaw,
+      entryTime: parseDate(entryRaw),
+      exitTime: parseDate(exitRaw),
+      side: String(value(r, "Side") ?? "").trim().toUpperCase(),
+      entry: num(value(r, "Entry")),
+      exit: num(value(r, "Exit")),
+      points: num(value(r, "Points")),
+      pnl: num(value(r, "Points")), // IMPORTANT: Points is the authoritative P&L
+      reason: String(value(r, "Reason") ?? "").trim()
+    };
+  });
+
+  const data = parsed.filter(r =>
+    r.entryTime &&
+    !isNaN(r.entryTime.getTime()) &&
+    r.exitTime &&
+    !isNaN(r.exitTime.getTime()) &&
+    (r.side === "BUY" || r.side === "SELL") &&
+    Number.isFinite(r.entry) &&
+    Number.isFinite(r.exit) &&
+    Number.isFinite(r.points)
+  );
+
+  // Exact duplicate-removal logic matching the Python analyzer.
+  const kept = [];
+
+  for(const r of data){
+    const duplicate = kept.some(k =>
+      r.entryTime.getTime() === k.entryTime.getTime() &&
+      Math.abs(r.exitTime.getTime() - k.exitTime.getTime()) <= 2000 &&
+      r.side === k.side &&
+      Math.abs(r.entry - k.entry) < 0.01 &&
+      Math.abs(r.exit - k.exit) < 0.01 &&
+      Math.abs(r.pnl - k.pnl) < 0.01
+    );
+
+    if(!duplicate){
+      kept.push(r);
+    }
+  }
+
+  return kept;
+}
+function keyDate(d){return d.toISOString().slice(0,10)}
+function keyMonth(d){return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")}
+function aggregate(data, keyFn){
+  const m=new Map();
+  data.forEach(r=>{
+    const key=keyFn(r.entryTime);
+    if(!m.has(key))m.set(key,{key,trades:0,wins:0,losses:0,be:0,pnl:0});
+    const x=m.get(key); x.trades++; x.pnl+=r.pnl;
+    if(r.pnl>0)x.wins++; else if(r.pnl<0)x.losses++; else x.be++;
+  });
+  let cum=0;
+  return [...m.values()].sort((a,b)=>a.key.localeCompare(b.key)).map(x=>{
+    cum+=x.pnl;x.cum=cum;x.winRate=x.trades?x.wins/x.trades*100:0;return x;
+  });
+}
+function statistics(data,daily){
+  const totalPnl=data.reduce((s,r)=>s+r.pnl,0);
+  const wins=data.filter(r=>r.pnl>0).length, losses=data.filter(r=>r.pnl<0).length, be=data.filter(r=>r.pnl===0).length;
+  const gp=data.filter(r=>r.pnl>0).reduce((s,r)=>s+r.pnl,0);
+  const gl=Math.abs(data.filter(r=>r.pnl<0).reduce((s,r)=>s+r.pnl,0));
+  let peak=-Infinity,dd=0;
+  daily.forEach(x=>{peak=Math.max(peak,x.cum);dd=Math.min(dd,x.cum-peak)});
+  const bestDay=daily.length?daily.reduce((a,b)=>b.pnl>a.pnl?b:a):null;
+  const worstDay=daily.length?daily.reduce((a,b)=>b.pnl<a.pnl?b:a):null;
+  return {totalPnl,wins,losses,be,gp,gl,avg:data.length?totalPnl/data.length:0,
+    pf:gl?gp/gl:Infinity,best:data.length?Math.max(...data.map(r=>r.pnl)):0,
+    worst:data.length?Math.min(...data.map(r=>r.pnl)):0,dd,bestDay,worstDay};
+}
+function reasonData(data){
+  const m=new Map();
+  data.forEach(r=>{
+    if(!m.has(r.reason))m.set(r.reason,{reason:r.reason,trades:0,pnl:0});
+    const x=m.get(r.reason);x.trades++;x.pnl+=r.pnl;
+  });
+  return [...m.values()].map(x=>({...x,avg:x.pnl/x.trades})).sort((a,b)=>a.pnl-b.pnl);
+}
+function setMetric(id,value,cls){
+  $(id).textContent=value;
+  $(id).className="value "+(cls||"");
+}
+function renderStats(s){
+  setMetric("totalPnl",money(s.totalPnl),s.totalPnl>=0?"green":"red");
+  setMetric("totalTrades",s.wins+s.losses+s.be);
+  setMetric("winRate",pct((s.wins/(s.wins+s.losses+s.be)||0)*100));
+  setMetric("profitFactor",s.pf===Infinity?"INF":s.pf.toFixed(2),s.pf>=1?"green":"red");
+  setMetric("grossProfit",money(s.gp),"green"); setMetric("grossLoss",money(s.gl),"red");
+  setMetric("avgTrade",money(s.avg),s.avg>=0?"green":"red");
+  setMetric("drawdown",money(s.dd),"red"); setMetric("bestTrade",money(s.best),"green"); setMetric("worstTrade",money(s.worst),"red");
+  setMetric("bestDay",s.bestDay?s.bestDay.key+" ("+money(s.bestDay.pnl)+")":"-","green");
+  setMetric("worstDay",s.worstDay?s.worstDay.key+" ("+money(s.worstDay.pnl)+")":"-","red");
+}
+function destroyCharts(){Object.values(charts).forEach(c=>c.destroy());charts={};}
+function chart(id,type,labels,data,label){
+  charts[id]=new Chart($(id),{type,data:{labels,datasets:[{label,data,borderWidth:2,borderRadius:5,tension:.3,fill:false}]},
+    options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{x:{grid:{display:false}},y:{grid:{color:"#edf0f5"}}}}});
+}
+function renderCharts(daily,monthly,reasons,data){
+  destroyCharts();
+  chart("dailyPnlChart","bar",daily.map(x=>x.key),daily.map(x=>x.pnl),"Daily P&L");
+  chart("cumulativeChart","line",daily.map(x=>x.key),daily.map(x=>x.cum),"Cumulative P&L");
+  chart("monthlyChart","bar",monthly.map(x=>x.key),monthly.map(x=>x.pnl),"Monthly P&L");
+  chart("winRateChart","line",daily.map(x=>x.key),daily.map(x=>x.winRate),"Win Rate");
+  const results=[data.filter(r=>r.pnl>0).length,data.filter(r=>r.pnl<0).length,data.filter(r=>r.pnl===0).length];
+  charts.tradeResultChart=new Chart($("tradeResultChart"),{type:"doughnut",data:{labels:["Winning","Losing","Breakeven"],datasets:[{data:results}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}}});
+  chart("reasonChart","bar",reasons.map(x=>x.reason||"Unknown"),reasons.map(x=>x.pnl),"P&L");
+  chart("tradeCountChart","bar",daily.map(x=>x.key),daily.map(x=>x.trades),"Trades");
+}
+function tableRow(x){
+  return `<tr><td>${x.key}</td><td>${x.trades}</td><td>${x.wins}</td><td>${x.losses}</td><td>${pct(x.winRate)}</td><td class="${x.pnl>=0?"positive":"negative"}">${money(x.pnl)}</td><td class="${x.cum>=0?"positive":"negative"}">${money(x.cum)}</td></tr>`;
+}
+function renderTables(daily,monthly,reasons){
+  $("dailyTable").innerHTML=daily.map(tableRow).join("");
+  $("monthlyTable").innerHTML=monthly.map(tableRow).join("");
+  $("reasonTable").innerHTML=reasons.map(x=>`<tr><td>${x.reason||"Unknown"}</td><td>${x.trades}</td><td class="${x.pnl>=0?"positive":"negative"}">${money(x.pnl)}</td><td>${money(x.avg)}</td></tr>`).join("");
+}
+function analyze(rows){
+  try{
+    const data=cleanTrades(rows);
+    if(!data.length){
+      const first = rows[0] ? Object.keys(rows[0]).join(", ") : "no columns";
+      const sample = rows[0] ? JSON.stringify(rows[0]) : "{}";
+      throw new Error(
+        "No valid trades found. Detected columns: " + first +
+        ". First row: " + sample
+      );
+    }
+    const daily=aggregate(data,keyDate), monthly=aggregate(data,keyMonth), reasons=reasonData(data), stats=statistics(data,daily);
+    renderStats(stats);renderCharts(daily,monthly,reasons,data);renderTables(daily,monthly,reasons);
+    $("dashboard").style.display="block";
+    $("status").textContent=`Loaded ${data.length} clean trades. Duplicate records removed automatically.`;
+  }catch(e){$("status").textContent="ERROR: "+e.message;}
+}
+function parseCSVText(text){
+  text = text
+    .replace(/^\uFEFF/, "")
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n");
+
+  const delimiter = detectDelimiter(text);
+  const rows = [];
+
+  let row = [];
+  let field = "";
+  let inQuotes = false;
+
+  for(let i = 0; i < text.length; i++){
+    const ch = text[i];
+
+    if(inQuotes){
+      if(ch === '"'){
+        if(text[i + 1] === '"'){
+          field += '"';
+          i++;
+        }else{
+          inQuotes = false;
+        }
+      }else{
+        field += ch;
+      }
+    }else{
+      if(ch === '"'){
+        inQuotes = true;
+      }else if(ch === delimiter){
+        row.push(field);
+        field = "";
+      }else if(ch === "\n"){
+        row.push(field);
+        field = "";
+
+        if(row.some(v => String(v).trim() !== "")){
+          rows.push(row);
+        }
+
+        row = [];
+      }else{
+        field += ch;
+      }
+    }
+  }
+
+  // Final row.
+  row.push(field);
+
+  if(row.some(v => String(v).trim() !== "")){
+    rows.push(row);
+  }
+
+  if(rows.length < 2){
+    throw new Error("CSV contains no data rows.");
+  }
+
+  const headers = rows[0].map(header =>
+    String(header)
+      .replace(/^\uFEFF/, "")
+      .replace(/\u00A0/g, " ")
+      .trim()
+  );
+
+  return rows.slice(1).map(values => {
+    const obj = {};
+
+    headers.forEach((header, index) => {
+      obj[header] = values[index] === undefined ? "" : values[index];
+    });
+
+    return obj;
+  });
+}
+function readFile(file){
+  $("status").textContent = "Reading CSV...";
+
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+    try{
+      const rows = parseCSVText(event.target.result);
+      analyze(rows);
+    }catch(error){
+      console.error(error);
+      $("status").textContent = "ERROR: " + error.message;
+    }
+  };
+
+  reader.onerror = function(){
+    $("status").textContent = "ERROR: Could not read the CSV file.";
+  };
+
+  reader.readAsText(file, "UTF-8");
+}
+$("fileInput").addEventListener("change",e=>{if(e.target.files[0])readFile(e.target.files[0])});
+$("dropZone").addEventListener("dragover",e=>{e.preventDefault();$("dropZone").classList.add("drag")});
+$("dropZone").addEventListener("dragleave",()=>$("dropZone").classList.remove("drag"));
+$("dropZone").addEventListener("drop",e=>{e.preventDefault();$("dropZone").classList.remove("drag");if(e.dataTransfer.files[0])readFile(e.dataTransfer.files[0])});
+$("demoBtn").addEventListener("click",()=>{
+  const rows=[]; const start=new Date("2026-01-05T09:15:00");
+  for(let i=0;i<80;i++){
+    const d=new Date(start);d.setDate(d.getDate()+Math.floor(i/3));
+    const entry=new Date(d);entry.setMinutes(entry.getMinutes()+i%3*30);
+    const exit=new Date(entry);exit.setMinutes(exit.getMinutes()+20);
+    const pnl=Math.round((Math.random()-.42)*300*100)/100;
+    rows.push({"Entry Time IST":entry.toISOString(),"Exit Time IST":exit.toISOString(),"Side":i%2?"SELL":"BUY","Entry":"2300","Exit":"2300","SL":"2290","TP":"2310","Points":pnl,"PnL":"0","Reason":pnl>0?"TP":"SL"});
+  }
+  analyze(rows);
+});
+</script>
+</body>
+</html>
